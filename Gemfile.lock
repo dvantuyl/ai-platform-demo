@@ -31,6 +31,7 @@ GEM
       fiber-annotation
       fiber-local (~> 1.1)
       json
+    erubi (1.13.0)
     ethon (0.16.0)
       ffi (>= 1.15.0)
     falcon (0.47.7)
@@ -103,6 +104,7 @@ GEM
     samovar (2.3.0)
       console (~> 1.0)
       mapping (~> 1.0)
+    tilt (2.4.0)
     traces (0.11.1)
     typhoeus (1.4.1)
       ethon (>= 0.9.0)
@@ -112,12 +114,14 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  erubi (~> 1.13)
   falcon (~> 0.47.7)
   ollama-ai (~> 1.2)
   rack-unreloader (~> 2.1)
   rerun (~> 0.14.0)
   roda (~> 3.81)
   roda-websockets (~> 0.1.0)
+  tilt (~> 2.4)
 
 BUNDLED WITH
    2.5.9

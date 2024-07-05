@@ -1,0 +1,31 @@
+<div hx-ext="ws" ws-connect="/ai-stream">
+	<form id="form" ws-send>
+			<wa-input id="user" name="user-input"></wa-input>
+			<wa-button type="submit">Send</wa-button>
+	</form>
+
+	<div id="ai-response" style="margin-top: 1rem;">
+	</div>
+</div>
+
+<style>
+	form {
+		width: 100%;
+		display: flex;
+		gap: 2rem;
+	}
+
+	wa-input {
+		flex: 1;
+	}
+
+	wa-button {
+		flex: none;
+	}
+
+	#ai-response {
+		width: 100%;
+		font-size: 1.25rem;
+		color: #333;
+	}
+</style>
