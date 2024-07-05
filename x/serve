@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+require 'rerun'
+
+ENV['RACK_ENV'] ||= 'development'
+
+def server
+  args = [
+    'bundle', 'exec', 'falcon', 'serve', '--count', '1',
+  ]
+
+  options = {
+    cmd: args.join(' '),
+    signal: 'TERM',
+    background: true,
+    growl: false,
+    name: 'Roda Server',
+    ignore: [],
+    dir: ["."],
+    pattern: "{Gemfile,Gemfile.lock,.gems,.bundle,.env*,config.ru,Rakefile,**/*.{rb,js,coffee,css,scss,sass,styl,erb,html,haml,ru,yml,slim,md,mab,rake}}"
+  }
+
+  Rerun::Runner.keep_running(options[:cmd], options)
+end
+
+server
