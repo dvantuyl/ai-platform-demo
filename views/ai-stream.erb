@@ -4,8 +4,10 @@
 			<wa-button type="submit">Send</wa-button>
 	</form>
 
-	<div id="ai-response" style="margin-top: 1rem;">
-	</div>
+	<zero-md id="ai-response-container" style="margin-top: 1rem;">
+		<script id="ai-response" type="text/markdown">
+		</script>
+	</zero-md>
 </div>
 
 <style>
@@ -23,7 +25,7 @@
 		flex: none;
 	}
 
-	#ai-response {
+	#ai-response-container {
 		width: 100%;
 		font-size: 1.25rem;
 		color: #333;
