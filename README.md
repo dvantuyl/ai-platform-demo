@@ -1,14 +1,36 @@
-# Roda + Falcon Websockets + HTMX
+# Ai Platform Demo
 
-This is an example Roda Web App setup for reading and writing to a Falcon Async Web Server. UI interaction handled by HTMX.
-
+This is a demo platform for building Ai powered user interfaces.
 
 ## Start
 
-1. `bundle install`
-2. `bundle exec falcon serve --count 1`
+1. Install Ollama and pull in the model weights for **phi3** & **llama3:instruct**
+   1a. Serve Ollama in the background at address `http://localhost:11434` 
+2. `bundle install`
+3. `x/serve`
+4. Open your browser to `https://localhost:9292/`
 
-## Dev Notes
+> Note: The first web-socket handshake will error due to browser not liking our self-signed SSL certificate. Ignore warning for now and let the browser access your site.
+
+## Stack
+
+### Web Service
+
+- [Roda](https://roda.jeremyevans.net/index.html): Ruby Minimal Web Framework
+- [Falcon](https://github.com/socketry/falcon): Async web server provides web sockets
+
+### LLM
+
+- [Ollama](https://ollama.com/): LLM Service
+- [phi3](https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/): Microsoft LLM
+- [llama3:instruct](https://ai.meta.com/blog/meta-llama-3/) Meta LLM
+
+### UI
+
+- [HTMX](https://htmx.org/): Page interactivity w/o javascript
+- [Web Awesome](https://shoelace.style/): UI Web Components
+
+## Change Log
 
 ### 2024-07-05
 
