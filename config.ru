@@ -115,16 +115,15 @@ class App < Roda
 	end
 
 	route do |r|
+		r.root do
+			BODY
+		end
+
 		r.is 'ai-stream' do
 			r.websocket do |connection|
 				messages(connection).each do |message|
 					on_message(connection, message)
 				end
-			end
-		end
-		r.is '' do
-			r.get do
-				BODY
 			end
 		end
 	end
