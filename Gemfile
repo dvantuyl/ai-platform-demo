@@ -12,3 +12,5 @@ gem "roda-websockets", "~> 0.1.0"
 gem "ollama-ai", "~> 1.2"
 
 gem "rerun", "~> 0.14.0"
+
+gem "rack-unreloader", "~> 2.1"
