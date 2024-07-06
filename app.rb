@@ -9,15 +9,6 @@ class App < Roda
 	plugin :common_logger
   plugin :render
 
-	def llm
-		@llm ||= Ollama.new(
-			credentials: { address: 'http://localhost:11434' },
-			options: {
-				connection: { adapter: :net_http },
-				server_sent_events: true
-			}
-		)
-	end
 
 	route do |r|
 		r.root do
@@ -26,7 +17,7 @@ class App < Roda
 
 		r.is 'ai-stream' do
 			r.websocket do |connection|
-        StreamRouter.new(connection, llm).start
+        StreamRouter.new(connection).start
 			end
 		end
 	end

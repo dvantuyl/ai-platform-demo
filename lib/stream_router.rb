@@ -2,18 +2,17 @@ require_relative 'agents/internlm2_basic_agent.rb'
 
 class StreamRouter
 
-  attr_reader :connection, :llm
+  attr_reader :connection
 
-  def initialize(connection, llm)
+  def initialize(connection)
     @connection = connection
-    @llm = llm
   end
 
   def start
     messages_streamed_from(@connection)
       .each(
         &parse_input >>
-        Agents::Internalm2BasicAgent.new(llm, connection).run
+        Agents::Internalm2BasicAgent.new(connection).run
       )
   end
 
@@ -26,8 +25,8 @@ class StreamRouter
         break unless message
 
         yielder << message
-      rescue Protocol::WebSocket::ClosedError => e
-        print "Connection closed: #{e}"
+      rescue Protocol::WebSocket::ClosedError
+        print "\n\nConnection Error: #{e}\n"
       end
     end
   end
