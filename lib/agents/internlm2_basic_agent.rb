@@ -1,4 +1,4 @@
-require_relative 'base_agent'
+require_relative 'ollama_agent'
 
 module Agents
   class Internalm2BasicAgent < OllamaAgent
