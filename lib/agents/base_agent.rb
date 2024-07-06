@@ -1,8 +1,8 @@
 module Agents
   class OllamaAgent
 
-    def self.run
-      self.new.run
+    def self.generate(stream)
+      self.new.generate(stream)
     end
 
     protected
@@ -15,19 +15,6 @@ module Agents
           server_sent_events: true
         }
       )
-    end
-
-    def write_to(output)
-      -> (event, raw) {
-        output.write ai_response(event['response'])
-        output.flush
-      }
-    end
-
-    def ai_response(value)
-      <<~HTML
-        <span hx-swap-oob="beforeend:#ai-response">#{value}</span>
-      HTML
     end
   end
 end

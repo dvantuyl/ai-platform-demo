@@ -3,11 +3,11 @@ require_relative 'base_agent'
 module Agents
   class Internalm2BasicAgent < OllamaAgent
 
-    def run
+    def generate(stream)
       ->(ctx) {
         llm.generate(
           { model: 'internlm2', prompt: ctx.user_input },
-          &write_to(ctx.connection)
+          &stream
         )
       }
     end

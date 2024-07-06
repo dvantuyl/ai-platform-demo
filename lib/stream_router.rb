@@ -18,11 +18,27 @@ class StreamRouter
       .each(
         &with_ctx({ connection: connection }) >>
         parse_input >>
-        Agents::Internalm2BasicAgent.run
+        Agents::Internalm2BasicAgent.generate(
+          to_stream(connection)
+        )
       )
   end
 
   private
+
+  def to_stream(connection)
+    ->(event, raw) {
+      connection.write ai_response(event['response'])
+      connection.flush
+    }
+  end
+
+
+  def ai_response(value)
+    <<~HTML
+      <span hx-swap-oob="beforeend:#ai-response">#{value}</span>
+    HTML
+  end
 
   def with_ctx(ctx)
     ->(message) {
