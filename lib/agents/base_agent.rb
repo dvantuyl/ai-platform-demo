@@ -1,7 +1,7 @@
 module Agents
   class OllamaAgent
 
-    def self.generate(stream)
+    def self.generate(&stream)
       self.new.generate(stream)
     end
 

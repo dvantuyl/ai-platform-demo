@@ -15,23 +15,17 @@ class StreamRouter
 
   def initialize(connection)
     messages_streamed_from(connection)
-      .each(
-        &with_ctx({ connection: connection }) >>
+      .each(&
+        with_ctx({ connection: connection }) >>
         parse_input >>
-        Agents::Internalm2BasicAgent.generate(
-          to_stream(connection)
-        )
+        Agents::Internalm2BasicAgent.generate do |event, raw|
+          connection.write ai_response(event['response'])
+          connection.flush
+        end
       )
   end
 
   private
-
-  def to_stream(connection)
-    ->(event, raw) {
-      connection.write ai_response(event['response'])
-      connection.flush
-    }
-  end
 
 
   def ai_response(value)
