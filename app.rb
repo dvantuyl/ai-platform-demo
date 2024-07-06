@@ -9,8 +9,8 @@ class App < Roda
 	plugin :common_logger
   plugin :render
 
-	def client
-		@client ||= Ollama.new(
+	def llm
+		@llm ||= Ollama.new(
 			credentials: { address: 'http://localhost:11434' },
 			options: {
 				connection: { adapter: :net_http },
@@ -19,31 +19,29 @@ class App < Roda
 		)
 	end
 
-  def message(value)
+  def ai_response(value)
     <<~HTML
 			<span hx-swap-oob="beforeend:#ai-response">#{value}</span>
 		HTML
   end
 
-	def on_message(connection, message)
-	  json = JSON.parse(message.buffer)
+	def route_message(output, input)
+	  json = JSON.parse(input.buffer)
 		user_input = json['user-input']
 		puts "User input: #{user_input}"
 
-		Async do |task|
-			client.generate({ model: 'phi3', prompt: user_input }) do |event, raw|
-				puts "Event: #{event.inspect}"
-				connection.write message(event['response'])
-				connection.flush
-			end
-		end
+    llm.generate({ model: 'internlm2', prompt: user_input }) do |event, raw|
+      puts "Event: #{event.inspect}"
+      output.write ai_response(event['response'])
+      output.flush
+    end
 
 	rescue e
-		connection.write message("Error: #{e.message}")
-		connection.flush
+		output.write ai_response("Error: #{e.message}")
+		output.flush
 	end
 
-	def messages(connection)
+	def messages_streamed_from(connection)
 		Enumerator.new do |yielder|
 			loop do
 				message = connection.read
@@ -61,8 +59,8 @@ class App < Roda
 
 		r.is 'ai-stream' do
 			r.websocket do |connection|
-				messages(connection).each do |message|
-					on_message(connection, message)
+				messages_streamed_from(connection).each do |message|
+					route_message(connection, message)
 				end
 			end
 		end

@@ -22,6 +22,7 @@ This is a demo platform for building Ai powered user interfaces.
 ### LLM
 
 - [Ollama](https://ollama.com/): LLM Service
+- [internlm](https://github.com/InternLM/InternLM): Chinese functional calling llm
 - [phi3](https://azure.microsoft.com/en-us/blog/introducing-phi-3-redefining-whats-possible-with-slms/): Microsoft LLM
 - [llama3:instruct](https://ai.meta.com/blog/meta-llama-3/) Meta LLM
 
@@ -32,12 +33,13 @@ This is a demo platform for building Ai powered user interfaces.
 
 ## Change Log
 
+
 ### 2024-07-05
 
-Acheived streaming AI woot! The default Typhoeus adapter was not working well with our Async calls. Switched to net_http.
+- Acheived streaming AI woot! The default Typhoeus adapter was not working well with our Async calls. Switched to net_http.
+- New llm with tool functionality
+[interalm2](https://github.com/InternLM/InternLM/blob/main/chat/chat_format.md#function-call--code-interpreter)
 
 ### 2024-07-04
 
-Allow chrome to accept self signed certs
-
-https://support.tools/post/chrome-accept-self-signed-certificate-guide/#:~:text=How%20to%20Get%20Chrome%20to%20Accept%20a%20Self-Signed,launches%20the%20Certificate%20Export%20Wizard.%20...%20More%20items
+- [Allow chrome to accept self signed certs](https://support.tools/post/chrome-accept-self-signed-certificate-guide/#:~:text=How%20to%20Get%20Chrome%20to%20Accept%20a%20Self-Signed,launches%20the%20Certificate%20Export%20Wizard.%20...%20More%20items)
