@@ -17,7 +17,7 @@ class App < Roda
 
 		r.is 'ai-stream' do
 			r.websocket do |connection|
-        StreamRouter.new(connection).start
+        StreamRouter.start(connection)
 			end
 		end
 	end

@@ -1,10 +1,8 @@
 module Agents
   class OllamaAgent
 
-    attr_reader :output
-
-    def initialize(output)
-      @output = output
+    def self.run
+      self.new.run
     end
 
     protected
@@ -19,9 +17,8 @@ module Agents
       )
     end
 
-    def write_out
+    def write_to(output)
       -> (event, raw) {
-        puts "Event: #{event.inspect}"
         output.write ai_response(event['response'])
         output.flush
       }

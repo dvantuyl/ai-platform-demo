@@ -4,8 +4,11 @@ module Agents
   class Internalm2BasicAgent < OllamaAgent
 
     def run
-      ->(input) {
-        llm.generate({ model: 'internlm2', prompt: input }, &write_out)
+      ->(ctx) {
+        llm.generate(
+          { model: 'internlm2', prompt: ctx.user_input },
+          &write_to(ctx.connection)
+        )
       }
     end
   end
