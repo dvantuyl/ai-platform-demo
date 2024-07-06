@@ -6,5 +6,8 @@ require 'rack/unreloader'
 
 Unreloader = Rack::Unreloader.new(subclasses: %w'Roda', reload: is_dev){App}
 Unreloader.require './app.rb'
+Unreloader.require './lib/stream_router.rb'
+Unreloader.require './lib/agents/base_agent.rb'
+Unreloader.require './lib/agents/internalm2_basic_agent.rb'
 
 run Unreloader
