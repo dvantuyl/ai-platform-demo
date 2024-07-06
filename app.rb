@@ -25,32 +25,38 @@ class App < Roda
 		HTML
   end
 
-	def route_message(output, input)
-	  json = JSON.parse(input.buffer)
-		user_input = json['user-input']
-		puts "User input: #{user_input}"
+  def parse_input
+    ->(input) {
+      json = JSON.parse(input.buffer)
+      json['user-input']
+    }
+  end
 
-    llm.generate({ model: 'internlm2', prompt: user_input }) do |event, raw|
-      puts "Event: #{event.inspect}"
-      output.write ai_response(event['response'])
-      output.flush
-    end
 
-	rescue e
-		output.write ai_response("Error: #{e.message}")
-		output.flush
-	end
+  def write_llm_output_to(output)
+    ->(input) {
+      llm.generate({ model: 'internlm2', prompt: input }) do |event, raw|
+        puts "Event: #{event.inspect}"
+        output.write ai_response(event['response'])
+        output.flush
+      end
+    }
+  end
 
-	def messages_streamed_from(connection)
+	def input_streamed_from(connection)
 		Enumerator.new do |yielder|
 			loop do
 				message = connection.read
 				break unless message
 
 				yielder << message
+      rescue Protocol::WebSocket::ClosedError => e
+        print "Connection closed: #{e}"
 			end
 		end
 	end
+
+
 
 	route do |r|
 		r.root do
@@ -59,10 +65,9 @@ class App < Roda
 
 		r.is 'ai-stream' do
 			r.websocket do |connection|
-				messages_streamed_from(connection).each do |message|
-					route_message(connection, message)
-				end
-			end
+        input_streamed_from(connection)
+          .each(&parse_input >> write_llm_output_to(connection))
+      end
 		end
 	end
 end
