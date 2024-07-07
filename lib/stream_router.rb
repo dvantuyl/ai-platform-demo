@@ -15,19 +15,24 @@ class StreamRouter
   end
 
   def start(connection)
-    # messages_streamed_from(connection)
-    #   .each(&
-    #     with_ctx >>
-    #     parse_message >>
-    #     Agents::InstructAgent.generate(&
-    #       format_response >>
-    #       write_to(connection)
-    #     )
-    #   )
+    # Initial message to start the conversation
     Agents::ChatAgent.generate(&
+      parse_output >>
       format_message >>
       write_to(connection)
     )
+
+    # Stream messages from the user
+    messages_streamed_from(connection)
+      .each(&
+        with_ctx >>
+        parse_user_input >>
+        Agents::InstructAgent.generate(&
+          parse_output >>
+          format_response >>
+          write_to(connection)
+        )
+      )
   end
 
   private
@@ -51,27 +56,38 @@ class StreamRouter
     }
   end
 
-
-  def parse_message
+  def parse_user_input
     ->(ctx) {
       json = JSON.parse(ctx.message.buffer)
       ctx.with(user_input: json['user-input'])
     }
   end
 
-  def format_message
+  def parse_output
     ->(event, raw) {
-      App.logger.info "Event: #{event}"
+      case symbolize_keys_deep!(event)
+      in { message: { content:, **}, **}
+        content
+      in { response:, **}
+        response
+      else
+        App.logger.error "Unknown event: #{event}"
+      end
+    }
+  end
+
+  def format_message
+    ->(output) {
       <<~HTML
-        <span hx-swap-oob="beforeend:#ai-response">#{event.dig('message', 'content')}</span>
+        <span hx-swap-oob="beforeend:#assistant-output">#{output}</span>
       HTML
     }
   end
 
   def format_response
-    ->(event, raw) {
+    ->(output) {
       <<~HTML
-        <span hx-swap-oob="beforeend:#ai-response">#{event['response']}</span>
+        <span hx-swap-oob="beforeend:#assistant-output">#{output}</span>
       HTML
     }
   end
@@ -81,5 +97,16 @@ class StreamRouter
       connection.write response
       connection.flush
     }
+  end
+
+  def symbolize_keys_deep!(h)
+    case h
+    in Hash
+      h.transform_keys!(&:to_sym).transform_values! { |v| symbolize_keys_deep!(v) }
+    in Array
+      h.map! { |v| symbolize_keys_deep!(v) }
+    else
+      h
+    end
   end
 end
