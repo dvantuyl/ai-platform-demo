@@ -1,16 +1,29 @@
-<div hx-ext="ws" ws-connect="/ai-stream">
-	<form id="form" ws-send>
+<div id="stream-container" hx-ext="ws" ws-connect="/ai-stream">
+	<div id="assistant-output-container">
+		<div id="assistant-output">
+		</div>
+	</div>
+	<form ws-send>
 			<wa-input id="user" name="user-input"></wa-input>
 			<wa-button type="submit">Send</wa-button>
 	</form>
-
-	<zero-md id="ai-response-container" style="margin-top: 1rem;">
-		<script id="ai-response" type="text/markdown">
-		</script>
-	</zero-md>
 </div>
 
 <style>
+	#stream-container {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 4rem;
+	}
+
+	#assistant-output-container {
+		width: 100%;
+		height: 45vh;
+		display: flex;
+	}
+
 	form {
 		width: 100%;
 		display: flex;
@@ -25,9 +38,9 @@
 		flex: none;
 	}
 
-	#ai-response-container {
+	#assistant-output {
 		width: 100%;
-		font-size: 1.25rem;
+		font-size: 2rem;
 		color: #333;
 	}
 </style>
