@@ -1,12 +1,12 @@
 require_relative 'ollama_agent'
 
 module Agents
-  class PromptAgent < OllamaAgent
+  class InstructAgent < OllamaAgent
 
     def generate(options = {}, stream)
       ->(ctx) {
         llm.generate(
-          { model: 'llama3:instruct', prompt: ctx.user_input, **options },
+          { model: 'internlm2', prompt: ctx.user_input, **options },
           &stream
         )
       }

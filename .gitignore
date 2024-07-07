@@ -1,0 +1,17 @@
+
+# Ignore logs directory
+/logs/
+
+
+# Ignore environment-specific files
+.env
+.env.local
+.env.*.local
+
+# Ignore editor and IDE files
+.vscode/
+.idea/
+
+
+# Ignore dependencies
+/node_modules/

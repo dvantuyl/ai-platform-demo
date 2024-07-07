@@ -1,4 +1,5 @@
-require_relative 'agents/prompt_agent.rb'
+require_relative 'agents/chat_agent.rb'
+require_relative 'agents/instruct_agent.rb'
 
 class StreamRouter
   Context = Data.define(:message, :user_input) do
@@ -14,15 +15,19 @@ class StreamRouter
   end
 
   def start(connection)
-    messages_streamed_from(connection)
-      .each(&
-        with_ctx >>
-        parse_message >>
-        Agents::PromptAgent.generate(&
-          format_response >>
-          write_to(connection)
-        )
-      )
+    # messages_streamed_from(connection)
+    #   .each(&
+    #     with_ctx >>
+    #     parse_message >>
+    #     Agents::InstructAgent.generate(&
+    #       format_response >>
+    #       write_to(connection)
+    #     )
+    #   )
+    Agents::ChatAgent.generate(&
+      format_message >>
+      write_to(connection)
+    )
   end
 
   private
@@ -35,7 +40,7 @@ class StreamRouter
 
         yielder << message
       rescue Protocol::WebSocket::ClosedError => e
-        print "\n\nConnection Error: #{e}\n"
+        App.logger.error "Connection closed: #{e.message}"
       end
     end
   end
@@ -54,6 +59,15 @@ class StreamRouter
     }
   end
 
+  def format_message
+    ->(event, raw) {
+      App.logger.info "Event: #{event}"
+      <<~HTML
+        <span hx-swap-oob="beforeend:#ai-response">#{event.dig('message', 'content')}</span>
+      HTML
+    }
+  end
+
   def format_response
     ->(event, raw) {
       <<~HTML
@@ -68,5 +82,4 @@ class StreamRouter
       connection.flush
     }
   end
-
 end

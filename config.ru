@@ -8,6 +8,7 @@ Unreloader = Rack::Unreloader.new(subclasses: %w'Roda', reload: is_dev){App}
 Unreloader.require './app.rb'
 Unreloader.require './lib/stream_router.rb'
 Unreloader.require './lib/agents/ollama_agent.rb'
-Unreloader.require './lib/agents/prompt_agent.rb'
+Unreloader.require './lib/agents/chat_agent.rb'
+Unreloader.require './lib/agents/instruct_agent.rb'
 
 run Unreloader
