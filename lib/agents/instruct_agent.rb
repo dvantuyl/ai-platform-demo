@@ -4,9 +4,12 @@ module Agents
   class InstructAgent < OllamaAgent
 
     def generate(options = {}, stream)
-      ->(ctx) {
+      ->(messages) {
+        model = 'internlm2'
+        prompt = messages.first[:content]
+
         llm.generate(
-          { model: 'internlm2', prompt: ctx.user_input, **options },
+          { model:, prompt:, **options },
           &stream
         )
       }
