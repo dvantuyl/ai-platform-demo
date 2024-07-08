@@ -31,15 +31,8 @@ This is a demo platform for building Ai powered user interfaces.
 - [HTMX](https://htmx.org/): Page interactivity w/o javascript
 - [Web Awesome](https://shoelace.style/): UI Web Components
 
-## Change Log
+## Reference
 
-
-### 2024-07-05
-
-- Acheived streaming AI woot! The default Typhoeus adapter was not working well with our Async calls. Switched to net_http.
-- New llm with tool functionality
-[interalm2](https://github.com/InternLM/InternLM/blob/main/chat/chat_format.md#function-call--code-interpreter)
-
-### 2024-07-04
-
+- [interalm2 | chat format](https://github.com/InternLM/InternLM/blob/main/chat/chat_format.md#function-call--code-interpreter)
+- [ollama | api](https://github.com/ollama/ollama/blob/main/docs/api.md)
 - [Allow chrome to accept self signed certs](https://support.tools/post/chrome-accept-self-signed-certificate-guide/#:~:text=How%20to%20Get%20Chrome%20to%20Accept%20a%20Self-Signed,launches%20the%20Certificate%20Export%20Wizard.%20...%20More%20items)
