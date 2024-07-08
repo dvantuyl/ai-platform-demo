@@ -72,26 +72,23 @@ Use this information to guide your interactions and ensure a positive user exper
 
     def init_message
       <<~INITMSG
-      Construct a brief greeting message based on the following guidelines:
+      At the start of my day, I would like a helpful greeting based on the following guidelines:
 
-      ### Use the Current Date and Time to provide context and relevance to the user's session.
-      From the Current Date and Time, and the time between now and the
-      last User Action History, implicitly acknowledge this new session with the user.
-      The amount of acknowledgment should be proportional to the time since the last interaction.
+      ### Current Date and Time
+      Greet me based on the Context's Current Date and Time
       Examples:
       - "Good Morning."
-      - "Welcome back."
+      - "Good Afternoon."
+      - "Good Evening."
       - "Let's continue where we left off."
 
-      ### Succinctly anticipate the user's needs.
-      Examples:
-      - "Continue working on the "Amy Fisher" presentation?"
-      - "Ready to schedule the meeting with "Sharron Jones"?"
-      - "Need help with the "Your Home" presentation?"
-      - "What's next on the agenda?"
+      ### User Action History
+      Anticipate my needs based on the Context's User Action History
 
+      ### Be Brief and Direct
+      Don't be too verbose. Keep it short and sweet.
 
-      After the user initiates the conversation with the prompt <|BEGIN|>, you can proceed with your constructed greeting message.
+      Start our day and greet me with a message that helps determine our next action to take.
 
       INITMSG
     end
@@ -99,11 +96,10 @@ Use this information to guide your interactions and ensure a positive user exper
     def generate(options = {}, stream)
         App.logger.info "ChatAgent: Generating system and initialization messages"
         llm.chat(
-          { model: 'llama3:instruct',
+          { model: 'internlm2',
             messages: [
               { role: 'system', content: system_message},
               { role: 'user', content: init_message},
-              { role: 'user', content: '<|BEGIN|>'}
             ], **options },
           &stream
         )
