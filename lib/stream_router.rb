@@ -86,8 +86,6 @@ class StreamRouter
       }
     end
 
-
-
     def parse_output
       ->(event, raw) {
         case symbolize_keys_deep!(event)
