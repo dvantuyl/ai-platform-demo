@@ -15,6 +15,8 @@ class StreamRouter
   end
 
   def start(connection)
+    clear_assistant_output(connection).call
+
     # Initial message to start the conversation
     Agents::ChatAgent.generate(&
       parse_output >>
@@ -26,6 +28,7 @@ class StreamRouter
     messages_streamed_from(connection)
       .each(&
         with_ctx >>
+        clear_assistant_output(connection) >>
         parse_user_input >>
         Agents::InstructAgent.generate(&
           parse_output >>
@@ -50,11 +53,22 @@ class StreamRouter
     end
   end
 
+  def clear_assistant_output(connection)
+    ->(ctx = nil) {
+      connection.write <<~HTML
+        <div id="assistant-output" hx-swap-oob="innerHTML:#assistant-output"></div>
+      HTML
+
+      ctx
+    }
+  end
+
   def with_ctx(ctx = {})
     ->(message) {
       Context.new(**ctx.merge(message:))
     }
   end
+
 
   def parse_user_input
     ->(ctx) {
@@ -65,6 +79,7 @@ class StreamRouter
 
   def parse_output
     ->(event, raw) {
+      App.logger.info "Event: #{event.inspect}"
       case symbolize_keys_deep!(event)
       in { message: { content:, **}, **}
         content

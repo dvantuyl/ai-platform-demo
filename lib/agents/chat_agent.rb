@@ -96,7 +96,7 @@ Use this information to guide your interactions and ensure a positive user exper
     def generate(options = {}, stream)
         App.logger.info "ChatAgent: Generating system and initialization messages"
         llm.chat(
-          { model: 'internlm2',
+          { model: 'llama3:instruct',
             messages: [
               { role: 'system', content: system_message},
               { role: 'user', content: init_message},
