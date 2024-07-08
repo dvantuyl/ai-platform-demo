@@ -4,6 +4,7 @@ require_relative 'message_pipe.rb'
 require_relative 'messages/streamed.rb'
 require_relative 'messages/system.rb'
 require_relative 'messages/user_welcome.rb'
+require_relative 'components/assistant_output.rb'
 
 class StreamRouter
   class << self
@@ -42,14 +43,13 @@ class StreamRouter
 
     def onloaded(connection)
       -> {
-
         MessagePipe.new(&
           Messages::System.append >>
           Messages::UserWelcome.append >>
-          clear_assistant_output(connection) >>
+          Components::AssistantOutput.clear(connection) >>
           Agents::ChatAgent.generate(&
             parse_output >>
-            format_message >>
+            Components::AssistantOutput.append_output >>
             write_to(connection)
           )
         )
@@ -60,23 +60,13 @@ class StreamRouter
       ->(userinput) {
         MessagePipe.new(&
           append_userinput(userinput) >>
-          clear_assistant_output(connection) >>
+          Components::AssistantOutput.clear(connection) >>
           Agents::ChatAgent.generate(&
             parse_output >>
-            format_message >>
+            Components::AssistantOutput.append_output >>
             write_to(connection)
           )
         )
-      }
-    end
-
-    def clear_assistant_output(connection)
-      ->(*args) {
-        connection.write <<~HTML
-          <div id="assistant-output" hx-swap-oob="innerHTML:#assistant-output"></div>
-        HTML
-
-        args
       }
     end
 
@@ -96,22 +86,6 @@ class StreamRouter
         else
           App.logger.error "Unknown event: #{event}"
         end
-      }
-    end
-
-    def format_message
-      ->(output) {
-        <<~HTML
-          <span hx-swap-oob="beforeend:#assistant-output">#{output}</span>
-        HTML
-      }
-    end
-
-    def format_response
-      ->(output) {
-        <<~HTML
-          <span hx-swap-oob="beforeend:#assistant-output">#{output}</span>
-        HTML
       }
     end
 
