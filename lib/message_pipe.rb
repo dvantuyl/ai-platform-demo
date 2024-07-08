@@ -1,7 +1,7 @@
 class MessagePipe
 
   class Messages < Array
-    def update(message)
+    def append(message)
       Messages.new([*self, message])
     end
   end
@@ -9,5 +9,4 @@ class MessagePipe
   def initialize(&block)
     block.call(Messages.new())
   end
-
 end

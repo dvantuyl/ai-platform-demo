@@ -1,13 +1,25 @@
 <div id="stream-container" hx-ext="ws" ws-connect="/ai-stream">
+	<form id="loaded" ws-send>
+		<input type="hidden" name="loaded" value="true"></input>
+	</form>
 	<div id="assistant-output-container">
 		<div id="assistant-output">
 		</div>
 	</div>
 	<form ws-send>
-			<wa-input id="user" name="user-input"></wa-input>
-			<wa-button type="submit">Send</wa-button>
+		<wa-input id="user" name="userinput"></wa-input>
+		<wa-button type="submit">Send</wa-button>
 	</form>
 </div>
+
+<script>
+	document.addEventListener("DOMContentLoaded", function() {
+		// Get the form element
+		var form = document.getElementById("loaded");
+		// Send the form data via WebSocket
+		form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+	});
+</script>
 
 <style>
 	#stream-container {

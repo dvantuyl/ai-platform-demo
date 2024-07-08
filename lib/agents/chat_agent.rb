@@ -4,14 +4,12 @@ module Agents
   class ChatAgent < OllamaAgent
     def generate(options = {}, stream)
       ->(messages) {
-        App.logger.info "ChatAgent messages: #{messages}"
         llm.chat(
           { model: 'llama3:instruct',
             messages: messages.flatten,
             **options },
           &stream
         )
-        # App.logger.info "ChatAgent response: #{merge_content(response)}"
       }
     end
 

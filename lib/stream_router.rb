@@ -9,46 +9,66 @@ class StreamRouter
   class << self
 
     def start(connection)
-
-      MessagePipe.new(&
-
-        # Initial message to start the conversation
-        Messages::System.append >>
-        Messages::UserWelcome.append >>
-        clear_assistant_output(connection) >>
-        Agents::ChatAgent.generate(&
-          parse_output >>
-          format_message >>
-          write_to(connection)
-        )
-
-        # # Stream messages from the user
-        # Messages::Streamed.from(connection)
-        #   .each(&
-        #     append_user_input >>
-        #     clear_assistant_output(connection) >>
-        #     Agents::InstructAgent.generate(&
-        #       parse_output >>
-        #       format_response >>
-        #       write_to(connection)
-        #     )
-        #   )
-      )
-
-      Enumerator.new do |yielder|
-        loop do
-          message = connection.read
-          break unless message
-
-          yielder << message
-        rescue e
-          App.logger.error "Connection closed: #{e.message}"
-        end
-      end
-
+      # Stream messages from the user
+      Messages::Streamed.from(connection)
+        .each(&
+          parse_message >>
+          route_message(
+            onloaded(connection),
+            onuserinput(connection)
+          ))
     end
 
     private
+
+    def parse_message
+      ->(message) {
+        symbolize_keys_deep!(JSON.parse(message.buffer))
+      }
+    end
+
+    def route_message(handleloaded, handleuserinput)
+      ->(message) {
+        case message
+        in { loaded: _, ** }
+          handleloaded.call
+        in { userinput:, ** }
+          handleuserinput.call(userinput)
+        else
+          App.logger.error "StreamRouter#route_message -> Unable to route: #{message}"
+        end
+      }
+    end
+
+    def onloaded(connection)
+      -> {
+
+        MessagePipe.new(&
+          Messages::System.append >>
+          Messages::UserWelcome.append >>
+          clear_assistant_output(connection) >>
+          Agents::ChatAgent.generate(&
+            parse_output >>
+            format_message >>
+            write_to(connection)
+          )
+        )
+      }
+    end
+
+    def onuserinput(connection)
+      ->(userinput) {
+        MessagePipe.new(&
+          append_userinput(userinput) >>
+          clear_assistant_output(connection) >>
+          Agents::ChatAgent.generate(&
+            parse_output >>
+            format_message >>
+            write_to(connection)
+          )
+        )
+      }
+    end
 
     def clear_assistant_output(connection)
       ->(*args) {
@@ -60,16 +80,16 @@ class StreamRouter
       }
     end
 
-    def append_user_input
-      ->(message) {
-        json = JSON.parse(message.buffer)
-        messages.update({ role: 'user', content: json['user-input'] })
+    def append_userinput(content)
+      ->(messages) {
+        messages.append({ role: 'user', content: })
       }
     end
 
+
+
     def parse_output
       ->(event, raw) {
-        App.logger.info "Event: #{event.inspect}"
         case symbolize_keys_deep!(event)
         in { message: { content:, **}, **}
           content

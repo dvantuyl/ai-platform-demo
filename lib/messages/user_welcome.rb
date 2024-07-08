@@ -4,7 +4,7 @@ module Messages
 
       def append
         ->(messages) {
-          messages.update({ role:, content:})
+          messages.append({ role:, content:})
         }
       end
 
