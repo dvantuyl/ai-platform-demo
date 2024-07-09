@@ -1,9 +1,9 @@
 module Messages
   class Message
     class << self
-      def append
+      def append(**args)
         ->(messages) {
-          messages.append({ role:, content:})
+          messages.append({ role:, content:, **args})
         }
       end
     end

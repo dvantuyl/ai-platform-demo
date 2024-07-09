@@ -5,55 +5,56 @@ module Stream
       def start(connection)
         # Stream messages from the user
         Events.from(connection)
-          .each(&
-            Events.parse_message >>
-            route_message(
-              on_loaded(connection),
-              on_userinput(connection)
-            ))
+          .each(&Events.parse_message >>
+            ->(message) {
+              case message
+              in { loaded: _, ** }
+                welcome_user(connection)
+              in { userinput:, ** }
+                reply_to_user(connection, userinput)
+              else
+                App.logger.error "StreamRouter#route_message -> Unable to route: #{message}"
+              end
+            })
       end
 
       private
 
-      def route_message(handle_loaded, handle_userinput)
-        ->(message) {
-          case message
-          in { loaded: _, ** }
-            handle_loaded.call
-          in { userinput:, ** }
-            handle_userinput.call(userinput)
-          else
-            App.logger.error "StreamRouter#route_message -> Unable to route: #{message}"
-          end
-        }
+      def welcome_user(connection)
+        MessagePipe.new(&
+          Messages::System.append(role: 'system') >>
+          Messages::UserWelcome.append(role: 'user') >>
+          Components::AssistantOutput.clear(connection) >>
+          Agents::ChatAgent.generate(&
+            Agents::ChatAgent.parse_output >>
+            Components::AssistantOutput.render_output_to(connection)
+          )
+        )
       end
 
-      def on_loaded(connection)
-        -> {
-          MessagePipe.new(&
-            Messages::System.append >>
-            Messages::UserWelcome.append >>
-            Components::AssistantOutput.clear(connection) >>
-            Agents::ChatAgent.generate(&
-              Agents::ChatAgent.parse_output >>
-              Components::AssistantOutput.render_output_to(connection)
-            )
+      def reply_to_user(connection, userinput)
+        MessagePipe.new(&
+          Messages::Message.append(role: 'user', content: userinput) >>
+          Components::AssistantOutput.clear(connection) >>
+          Agents::ChatAgent.generate(&
+            Agents::ChatAgent.parse_output >>
+            Components::AssistantOutput.render_output_to(connection)
           )
-        }
+        )
       end
 
-      def on_userinput(connection)
-        ->(userinput) {
-          MessagePipe.new(&
-            MessagePipe.append({ role: 'user', content: userinput}) >>
-            Components::AssistantOutput.clear(connection) >>
-            Agents::ChatAgent.generate(&
-              Agents::ChatAgent.parse_output >>
-              Components::AssistantOutput.render_output_to(connection)
-            )
-          )
-        }
-      end
+      # def provide_actions(connection)
+      #   MessagePipe.new(&
+      #     Messages::ContextHistory.append(role: 'system') >>
+      #     Messages::ContactTool.append(role: 'system') >>
+      #     Messages::PresentationTool.append(role: 'system') >>
+      #     Commponents::ActionMenu.clear(connection) >>
+      #     Agents::InstructAgent.generate(&
+      #       Agents::InstructAgent.parse_output >>
+      #       Components::ActionMenu.render_output_to(connection)
+      #     )
+      #   )
+      # end
     end
   end
 end
