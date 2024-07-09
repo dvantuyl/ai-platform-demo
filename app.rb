@@ -2,6 +2,7 @@
 
 require 'roda'
 require 'ollama-ai'
+require_relative 'lib/hash.rb'
 
 class App < Roda
   LOG_FILE_PATH = "./logs/#{ENV['RACK_ENV'] || 'development'}.log"

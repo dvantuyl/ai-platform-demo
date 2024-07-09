@@ -7,7 +7,7 @@ module Agents
 
     def self.parse_output
       ->(event, raw) {
-        case symbolize_keys_deep!(event)
+        case event.symbolize_keys_deep!
         in { message: { content:, **}, **}
           content
         in { response:, **}
@@ -28,17 +28,6 @@ module Agents
           server_sent_events: true
         }
       )
-    end
-
-    def self.symbolize_keys_deep!(h)
-      case h
-      in Hash
-        h.transform_keys!(&:to_sym).transform_values! { |v| symbolize_keys_deep!(v) }
-      in Array
-        h.map! { |v| symbolize_keys_deep!(v) }
-      else
-        h
-      end
     end
   end
 end

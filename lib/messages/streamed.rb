@@ -16,19 +16,8 @@ module Messages
 
       def parse_message
         ->(message) {
-          symbolize_keys_deep!(JSON.parse(message.buffer))
+          JSON.parse(message.buffer).symbolize_keys_deep!
         }
-      end
-
-      def symbolize_keys_deep!(h)
-        case h
-        in Hash
-          h.transform_keys!(&:to_sym).transform_values! { |v| symbolize_keys_deep!(v) }
-        in Array
-          h.map! { |v| symbolize_keys_deep!(v) }
-        else
-          h
-        end
       end
     end
   end
