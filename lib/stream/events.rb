@@ -1,5 +1,5 @@
-module Messages
-  class Streamed
+module Stream
+  class Events
     class << self
       def from(connection)
         Enumerator.new do |yielder|

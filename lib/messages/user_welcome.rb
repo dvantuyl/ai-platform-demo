@@ -1,15 +1,8 @@
+require_relative 'message.rb'
+
 module Messages
-  class UserWelcome
+  class UserWelcome < Message
     class << self
-
-      def append
-        ->(messages) {
-          messages.append({ role:, content:})
-        }
-      end
-
-      private
-
       def role
         'user'
       end
