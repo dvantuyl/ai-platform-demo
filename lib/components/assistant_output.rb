@@ -13,11 +13,14 @@ module Components
         }
       end
 
-      def append_output
+      def render_output_to(connection)
         ->(output) {
-          <<~HTML
+          connection.write <<~HTML
             <span hx-swap-oob="beforeend:#assistant-output">#{output}</span>
           HTML
+          connection.flush
+
+          output
         }
       end
     end

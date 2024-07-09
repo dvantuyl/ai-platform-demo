@@ -13,98 +13,58 @@ class StreamRouter
       # Stream messages from the user
       Messages::Streamed.from(connection)
         .each(&
-          parse_message >>
+          Messages::Streamed.parse_message >>
           route_message(
-            onloaded(connection),
-            onuserinput(connection)
+            on_loaded(connection),
+            on_userinput(connection)
           ))
     end
 
     private
 
-    def parse_message
-      ->(message) {
-        symbolize_keys_deep!(JSON.parse(message.buffer))
-      }
-    end
-
-    def route_message(handleloaded, handleuserinput)
+    def route_message(handle_loaded, handle_userinput)
       ->(message) {
         case message
         in { loaded: _, ** }
-          handleloaded.call
+          handle_loaded.call
         in { userinput:, ** }
-          handleuserinput.call(userinput)
+          handle_userinput.call(userinput)
         else
           App.logger.error "StreamRouter#route_message -> Unable to route: #{message}"
         end
       }
     end
 
-    def onloaded(connection)
+    def on_loaded(connection)
       -> {
         MessagePipe.new(&
           Messages::System.append >>
           Messages::UserWelcome.append >>
           Components::AssistantOutput.clear(connection) >>
           Agents::ChatAgent.generate(&
-            parse_output >>
-            Components::AssistantOutput.append_output >>
-            write_to(connection)
+            Agents::ChatAgent.parse_output >>
+            Components::AssistantOutput.render_output_to(connection)
           )
         )
       }
     end
 
-    def onuserinput(connection)
+    def on_userinput(connection)
       ->(userinput) {
         MessagePipe.new(&
-          append_userinput(userinput) >>
+          MessagePipe.append({ role: 'user', content: userinput}) >>
           Components::AssistantOutput.clear(connection) >>
           Agents::ChatAgent.generate(&
-            parse_output >>
-            Components::AssistantOutput.append_output >>
-            write_to(connection)
+            Agents::ChatAgent.parse_output >>
+            Components::AssistantOutput.render_output_to(connection)
           )
         )
       }
     end
 
-    def append_userinput(content)
-      ->(messages) {
-        messages.append({ role: 'user', content: })
-      }
+    def inspect
+      ->(*args) { App.logger.info "ARGS: #{args.inspect}"; args}
     end
 
-    def parse_output
-      ->(event, raw) {
-        case symbolize_keys_deep!(event)
-        in { message: { content:, **}, **}
-          content
-        in { response:, **}
-          response
-        else
-          App.logger.error "Unknown event: #{event}"
-        end
-      }
-    end
-
-    def write_to(connection)
-      ->(response) {
-        connection.write response
-        connection.flush
-      }
-    end
-
-    def symbolize_keys_deep!(h)
-      case h
-      in Hash
-        h.transform_keys!(&:to_sym).transform_values! { |v| symbolize_keys_deep!(v) }
-      in Array
-        h.map! { |v| symbolize_keys_deep!(v) }
-      else
-        h
-      end
-    end
   end
 end
